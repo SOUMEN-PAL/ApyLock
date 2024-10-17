@@ -2,6 +2,7 @@ package com.example.apyblock.domain.repository
 
 import com.example.apyblock.data.db.AppDatabase
 import com.example.apyblock.domain.models.AppDataModel
+import com.example.apyblock.domain.models.AppTimeModel
 import com.example.apyblock.utils.BannedAppFetchingState
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -23,11 +24,11 @@ class AppDataRepository(private val appDatabase:AppDatabase) {
         }
     }
 
-    suspend fun getAppTimeDetails(appPackageName : String):Pair<Long? , Long?>{
+    suspend fun getAppTimeDetails(appPackageName : String):AppTimeModel{
         return try{
             appDatabase.appDataDAO().getAppTimeDetails(appPackageName)
         }catch (e: Exception){
-            Pair(null , null)
+            AppTimeModel(null , null)
         }
     }
 

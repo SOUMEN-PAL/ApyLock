@@ -35,17 +35,9 @@ class AppBlockingService : AccessibilityService() {
                 if (bannedAppNames.contains(packageName)) {
                     val timeDetail = repository.getAppTimeDetails(packageName)
 
-                    val startTime = if (timeDetail.first != null) {
-                        timeDetail.first
-                    } else {
-                        -1
-                    }
+                    val startTime = timeDetail.startTime ?: -1
 
-                    val endTime = if (timeDetail.second != null) {
-                        timeDetail.second
-                    } else {
-                        -1
-                    }
+                    val endTime = timeDetail.endTime ?: -1
 
                     performGlobalAction(GLOBAL_ACTION_BACK)
                     Log.d("blockingApp", "Abe padhle")

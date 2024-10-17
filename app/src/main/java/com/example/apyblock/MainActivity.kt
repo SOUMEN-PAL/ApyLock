@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.apyblock.presentation.OnBoardingScreen
 import com.example.apyblock.presentation.PermissionScreen
+import com.example.apyblock.presentation.navigation.Navigation
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.example.apyblock.presentation.viewmodels.MainViewModelFactory
 import com.example.apyblock.ui.theme.ApyBlockTheme
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
             mainViewModel = viewModel(factory = MainViewModelFactory(repository))
             ApyBlockTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PermissionScreen(modifier = Modifier.padding(innerPadding))
+                    Navigation(viewModel = mainViewModel, context = this@MainActivity , modifier = Modifier.padding(innerPadding))
                 }
             }
         }

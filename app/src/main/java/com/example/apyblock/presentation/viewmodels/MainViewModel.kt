@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteException
+import android.graphics.drawable.Drawable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,6 +27,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     private var _allAppsDataList = MutableStateFlow<AllAppsFetchingState>(AllAppsFetchingState.Loading())
     val allAppsDataList = _allAppsDataList.asStateFlow()
 
+    val selectedScreenIndex = mutableIntStateOf(0)
 
     fun getBannedApps(){
         viewModelScope.launch {
@@ -69,6 +73,16 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
             _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
         }else{
             _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+        }
+    }
+
+    fun getAPPIcon(context: Context , packageName : String) : Drawable?{
+        return try {
+            val packageManager = context.packageManager
+            val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            applicationInfo.loadIcon(packageManager)
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
         }
     }
 

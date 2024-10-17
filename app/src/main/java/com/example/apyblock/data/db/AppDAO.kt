@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.apyblock.domain.models.AppDataModel
+import com.example.apyblock.domain.models.AppTimeModel
 
 @Dao
 interface AppDAO {
@@ -18,7 +19,7 @@ interface AppDAO {
     suspend fun getBannedAppNames() : List<String>
 
     @Query("SELECT startTime,endTime FROM blocked_apps WHERE packageName= :appPackageName")
-    suspend fun getAppTimeDetails(appPackageName : String) : Pair<Long , Long>
+    suspend fun getAppTimeDetails(appPackageName : String) : AppTimeModel
 
     @Update
     suspend fun updateAppData(appData: AppDataModel)
