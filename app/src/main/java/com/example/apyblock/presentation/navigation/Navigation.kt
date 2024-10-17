@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.apyblock.androidComponents.AppBlockingService
-import com.example.apyblock.presentation.BlockAppScreen
+import com.example.apyblock.presentation.blockAppScreenUI.BlockAppScreen
 import com.example.apyblock.presentation.OnBoardingScreen
 import com.example.apyblock.presentation.PermissionScreen
 import com.example.apyblock.presentation.viewmodels.MainViewModel

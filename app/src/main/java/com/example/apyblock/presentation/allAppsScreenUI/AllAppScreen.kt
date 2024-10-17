@@ -1,4 +1,4 @@
-package com.example.apyblock.presentation
+package com.example.apyblock.presentation.allAppsScreenUI
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
