@@ -23,7 +23,7 @@ fun BlockAppScreen(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
-
+            TopBar()
         },
         bottomBar = {
             BottomBar(viewModel = viewModel, navController = navController)

@@ -2,6 +2,7 @@ package com.example.apyblock.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -53,6 +54,8 @@ fun BottomBar(
             .height(130.dp)
             .imePadding()
             .padding(bottom = navigationBarsPadding.calculateBottomPadding()),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
         Button(
@@ -73,7 +76,7 @@ fun BottomBar(
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .fillMaxSize()
                     .background(
                         color = if (selectedButton == 0) {
@@ -115,7 +118,7 @@ fun BottomBar(
         ) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .fillMaxSize()
                     .background(
                         color = if (selectedButton == 1) {
