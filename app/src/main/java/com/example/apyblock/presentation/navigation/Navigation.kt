@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.apyblock.androidComponents.AppBlockingService
+import com.example.apyblock.presentation.BlockAppScreen
 import com.example.apyblock.presentation.OnBoardingScreen
 import com.example.apyblock.presentation.PermissionScreen
 import com.example.apyblock.presentation.viewmodels.MainViewModel
@@ -22,10 +23,10 @@ fun Navigation(
     NavHost(
         navController = navController,
         startDestination = if(AccessibilityServiceUtil.isAccessibilityServiceEnabled(context , AppBlockingService::class.java)){
-            Screens.permissionScreen.route
+            Screens.blockedAppScreen.route
         }
         else{
-            Screens.onBoardingScreen.route
+            Screens.blockedAppScreen.route
         }
     ){
 
@@ -35,6 +36,10 @@ fun Navigation(
 
         composable(route = Screens.permissionScreen.route){
             PermissionScreen()
+        }
+
+        composable(route = Screens.blockedAppScreen.route){
+            BlockAppScreen(viewModel = viewModel, navController = navController)
         }
 
     }
