@@ -59,7 +59,9 @@ fun BlockAppScreen(
         containerColor = colorResource(id = R.color.background_dark)
     ) {
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(it),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             val bannedAppsListState by viewModel.bannedAppListState.collectAsState()

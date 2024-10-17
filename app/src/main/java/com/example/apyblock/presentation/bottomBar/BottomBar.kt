@@ -135,8 +135,6 @@ fun BottomBar(
                 )
             }
         }
-
     }
-
 }
 
