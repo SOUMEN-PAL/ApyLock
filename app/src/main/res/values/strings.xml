@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ApyBlock</string>
+
+    <string name="accessibility_service_description">Service to block distracting apps.</string>
+</resources>
