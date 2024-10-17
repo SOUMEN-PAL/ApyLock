@@ -10,6 +10,7 @@ import com.example.apyblock.androidComponents.AppBlockingService
 import com.example.apyblock.presentation.blockAppScreenUI.BlockAppScreen
 import com.example.apyblock.presentation.OnBoardingScreen
 import com.example.apyblock.presentation.PermissionScreen
+import com.example.apyblock.presentation.allAppsScreenUI.AllAppScreen
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.example.apyblock.utils.AccessibilityServiceUtil
 
@@ -26,20 +27,24 @@ fun Navigation(
             Screens.blockedAppScreen.route
         }
         else{
-            Screens.blockedAppScreen.route
+            Screens.onBoardingScreen.route
         }
     ){
 
         composable(route = Screens.onBoardingScreen.route){
-            OnBoardingScreen()
+            OnBoardingScreen(navController = navController)
         }
 
         composable(route = Screens.permissionScreen.route){
-            PermissionScreen()
+            PermissionScreen(navController = navController)
         }
 
         composable(route = Screens.blockedAppScreen.route){
             BlockAppScreen(viewModel = viewModel, navController = navController)
+        }
+
+        composable(route = Screens.allAppDataScreen.route){
+            AllAppScreen()
         }
 
     }

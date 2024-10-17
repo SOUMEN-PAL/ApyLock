@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,10 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apyblock.R
+import com.example.apyblock.domain.models.AppDataModel
 import com.example.apyblock.presentation.bottomBar.BottomBar
 import com.example.apyblock.presentation.topBar.TopBar
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.example.apyblock.utils.BannedAppFetchingState
+import kotlinx.coroutines.delay
 
 @Composable
 fun BlockAppScreen(
@@ -40,6 +43,7 @@ fun BlockAppScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        delay(500L)
         viewModel.getBannedApps()
     }
 
@@ -89,7 +93,7 @@ fun BlockAppScreen(
                 is BannedAppFetchingState.Success -> {
                     val bannedAppList =
                         (bannedAppsListState as BannedAppFetchingState.Success).appList
-                    if (!bannedAppList.isEmpty()) {
+                    if (bannedAppList.isEmpty()) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.Center,
@@ -140,8 +144,15 @@ fun BlockAppScreen(
                             }
 
                             LazyColumn(
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
+
+                                items(bannedAppList){bannedAppData->
+                                    BlockedAppItem(viewModel = viewModel, blockedApp = bannedAppData , navController = navController)
+                                }
 
                             }
 

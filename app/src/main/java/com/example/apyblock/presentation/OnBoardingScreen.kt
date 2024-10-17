@@ -41,10 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.apyblock.R
+import com.example.apyblock.presentation.navigation.Screens
 
 @Composable
-fun OnBoardingScreen(modifier: Modifier = Modifier) {
+fun OnBoardingScreen(modifier: Modifier = Modifier , navController: NavController) {
 
 
 
@@ -147,7 +149,9 @@ fun OnBoardingScreen(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.Bottom
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    navController.navigate(Screens.permissionScreen.route)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -213,9 +217,3 @@ fun Screen(modifier: Modifier , image : Int) {
 
 
 
-
-@Preview(showBackground = true)
-@Composable
-fun Screen1Preview() {
-    Screen(modifier = Modifier , 1)
-}

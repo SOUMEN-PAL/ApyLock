@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.apyblock.R
+import com.example.apyblock.presentation.navigation.Screens
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 
 @Composable
@@ -52,6 +53,7 @@ fun BottomBar(
         Button(
             onClick = {
                 viewModel.selectedScreenIndex.intValue = 0
+                navController.navigate(Screens.blockedAppScreen.route)
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -95,6 +97,7 @@ fun BottomBar(
         Button(
             onClick = {
                 viewModel.selectedScreenIndex.intValue = 1
+                navController.navigate(Screens.allAppDataScreen.route)
             },
             modifier = Modifier
                 .fillMaxSize()

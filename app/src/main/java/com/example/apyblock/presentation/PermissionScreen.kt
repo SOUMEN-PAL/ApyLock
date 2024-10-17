@@ -42,13 +42,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.apyblock.R
 import com.example.apyblock.androidComponents.AppBlockingService
+import com.example.apyblock.presentation.navigation.Screens
 import com.example.apyblock.utils.AccessibilityServiceUtil
 import kotlinx.coroutines.delay
 
 @Composable
-fun PermissionScreen(modifier: Modifier = Modifier) {
+fun PermissionScreen(modifier: Modifier = Modifier , navController: NavController) {
     val context = LocalContext.current
     var shouldNavigate by remember { mutableStateOf(false) }
 
@@ -104,6 +106,7 @@ fun PermissionScreen(modifier: Modifier = Modifier) {
 
                     if(shouldNavigate){
                         //TODO: navigate to the next screen
+                        navController.navigate(Screens.blockedAppScreen.route)
                     }
 
                 },
@@ -120,7 +123,7 @@ fun PermissionScreen(modifier: Modifier = Modifier) {
                 )
             ) {
                 Text(
-                    text = "Grant Access",
+                    text = if(!shouldNavigate){"Grant Access"} else{"Explore App"},
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -133,8 +136,3 @@ fun PermissionScreen(modifier: Modifier = Modifier) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PermissionScreenPreview(){
-    PermissionScreen()
-}
