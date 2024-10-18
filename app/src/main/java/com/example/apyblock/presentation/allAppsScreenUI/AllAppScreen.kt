@@ -1,6 +1,8 @@
 package com.example.apyblock.presentation.allAppsScreenUI
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,6 +52,7 @@ import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.example.apyblock.utils.AllAppsFetchingState
 import kotlinx.coroutines.delay
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AllAppScreen(
     modifier: Modifier = Modifier,
@@ -59,7 +62,7 @@ fun AllAppScreen(
     val allAppDataListState by viewModel.allAppsDataList.collectAsState()
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        delay(500L)
+        viewModel.resetSearchedList()
         viewModel.getAllAppInSystem(context)
     }
     var searchQuery by viewModel.searchQuery
@@ -160,7 +163,7 @@ fun AllAppScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(9f),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 when(allAppDataListState){
@@ -186,16 +189,21 @@ fun AllAppScreen(
                     is AllAppsFetchingState.Searching -> {
                         Column(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
+                            verticalArrangement = Arrangement.Top,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             val searchedAppList = (allAppDataListState as AllAppsFetchingState.Searching).searchedAppList
                             Log.d("appdata" , searchedAppList.toString())
                             LazyColumn(
-
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                items(searchedAppList){searchedAppData->
-
+                                items(searchedAppList , key = {appData->
+                                    appData.packageName
+                                }){searchedAppData->
+                                    IndividualAppData(appData = searchedAppData, viewModel = viewModel)
                                 }
                             }
                         }
@@ -203,16 +211,20 @@ fun AllAppScreen(
                     is AllAppsFetchingState.Success -> {
                         Column(
                             modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             val allAppList = (allAppDataListState as AllAppsFetchingState.Success).appList
                             Log.d("appdata" , allAppList.toString())
                             LazyColumn(
-
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                items(allAppList){allAppData->
-
+                                items(allAppList , key = { appData->
+                                    appData.packageName
+                                }){allAppData->
+                                    IndividualAppData(appData = allAppData, viewModel = viewModel)
                                 }
                             }
                         }

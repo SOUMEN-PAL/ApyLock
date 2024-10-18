@@ -21,6 +21,9 @@ interface AppDAO {
     @Query("SELECT startTime,endTime FROM blocked_apps WHERE packageName= :appPackageName")
     suspend fun getAppTimeDetails(appPackageName : String) : AppTimeModel
 
+    @Query("DELETE FROM blocked_apps WHERE packageName = :packageName")
+    suspend fun removeFromBannedAppsList(packageName : String)
+
     @Update
     suspend fun updateAppData(appData: AppDataModel)
 

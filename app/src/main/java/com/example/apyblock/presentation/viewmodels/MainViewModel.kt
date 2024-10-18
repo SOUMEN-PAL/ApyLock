@@ -23,10 +23,12 @@ import kotlinx.coroutines.launch
 class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
 
-    private var _bannedAppsListState = MutableStateFlow<BannedAppFetchingState>(BannedAppFetchingState.Loading())
+    private var _bannedAppsListState =
+        MutableStateFlow<BannedAppFetchingState>(BannedAppFetchingState.Loading())
     val bannedAppListState = _bannedAppsListState.asStateFlow()
 
-    private var _allAppsDataList = MutableStateFlow<AllAppsFetchingState>(AllAppsFetchingState.Loading())
+    private var _allAppsDataList =
+        MutableStateFlow<AllAppsFetchingState>(AllAppsFetchingState.Loading())
     val allAppsDataList = _allAppsDataList.asStateFlow()
 
 
@@ -34,40 +36,48 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     val searchQuery = mutableStateOf("")
     val isSearching = mutableStateOf(false)
 
-    fun getBannedApps(){
+    fun getBannedApps() {
         viewModelScope.launch {
             try {
-                _bannedAppsListState.value = BannedAppFetchingState.Success(repository.getBannedApps())
+                _bannedAppsListState.value =
+                    BannedAppFetchingState.Success(repository.getBannedApps())
             } catch (e: SQLiteException) { // More specific exception handling
-                _bannedAppsListState.value = BannedAppFetchingState.Error("Database error: ${e.message}")
+                _bannedAppsListState.value =
+                    BannedAppFetchingState.Error("Database error: ${e.message}")
             } catch (e: Exception) {
-                _bannedAppsListState.value = BannedAppFetchingState.Error("Error fetching banned list: ${e.message}")
+                _bannedAppsListState.value =
+                    BannedAppFetchingState.Error("Error fetching banned list: ${e.message}")
             }
         }
     }
 
 
-    fun addAppData(appData : AppDataModel){
+    fun addAppData(appData: AppDataModel) {
         viewModelScope.launch {
             repository.addAppData(appData)
         }
     }
 
-    fun updateTime(appData: AppDataModel){
+    fun updateTime(appData: AppDataModel) {
         viewModelScope.launch {
             repository.updateTime(appData)
         }
     }
 
-    fun getAllAppInSystem(context: Context){
+    fun getAllAppInSystem(context: Context) {
 
-        repository.getAllAppInSystem(context = context , onSuccess = {allAppModelList->
-            if(allAppModelList.size>0){
-                _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
-            }else{
-                _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
-            }
-        })
+        viewModelScope.launch {
+            repository.getAllAppInSystem(
+                context = context,
+                onSuccess = { allAppModelList ->
+                    if (allAppModelList.size > 0) {
+                        _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
+                    } else {
+                        _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+                    }
+                }
+            )
+        }
     }
 
     fun getAppsContainingLetters(context: Context) {
@@ -75,7 +85,10 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         job?.cancel()
         job = viewModelScope.launch {
             delay(500L)
-            repository.getSearchedApps(context = context, letter = searchQuery.value) { matchedAppList ->
+            repository.getSearchedApps(
+                context = context,
+                letter = searchQuery.value
+            ) { matchedAppList ->
                 if (matchedAppList.size > 0) {
                     _allAppsDataList.value = AllAppsFetchingState.Searching(matchedAppList)
                 } else {
@@ -89,13 +102,20 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         _allAppsDataList.value = AllAppsFetchingState.Loading()
     }
 
-    fun getAPPIcon(context: Context , packageName : String) : Drawable?{
+    fun getAPPIcon(context: Context, packageName: String): Drawable? {
         return try {
             val packageManager = context.packageManager
-            val applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            val applicationInfo =
+                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
             applicationInfo.loadIcon(packageManager)
         } catch (e: PackageManager.NameNotFoundException) {
             null
+        }
+    }
+
+    fun deleteAppFromBannedList(packageName: String) {
+        viewModelScope.launch {
+            repository.removeFromBannedAppsList(packageName)
         }
     }
 

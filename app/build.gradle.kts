@@ -8,6 +8,7 @@ android {
     namespace = "com.example.apyblock"
     compileSdk = 34
 
+
     defaultConfig {
         applicationId = "com.example.apyblock"
         minSdk = 24
