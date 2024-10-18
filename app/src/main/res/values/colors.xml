@@ -10,4 +10,5 @@
     <color name="background_dark">#FF0C0C0C</color>
     <color name="appGreen">#FF28A745</color>
     <color name="onTapColor">#FF121212</color>
+    <color name="redApp">#FFF44336</color>
 </resources>

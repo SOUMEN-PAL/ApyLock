@@ -14,6 +14,8 @@ import com.example.apyblock.domain.models.AppDataModel
 import com.example.apyblock.domain.repository.AppDataRepository
 import com.example.apyblock.utils.AllAppsFetchingState
 import com.example.apyblock.utils.BannedAppFetchingState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -27,7 +29,10 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     private var _allAppsDataList = MutableStateFlow<AllAppsFetchingState>(AllAppsFetchingState.Loading())
     val allAppsDataList = _allAppsDataList.asStateFlow()
 
+
     val selectedScreenIndex = mutableIntStateOf(0)
+    val searchQuery = mutableStateOf("")
+    val isSearching = mutableStateOf(false)
 
     fun getBannedApps(){
         viewModelScope.launch {
@@ -55,25 +60,33 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     }
 
     fun getAllAppInSystem(context: Context){
-        val packageManager = context.packageManager
-        val allAppsData = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-        val allAppModelList: MutableList<AppDataModel> = mutableListOf()
-        for(appInfo in allAppsData){
-            allAppModelList.add(
-                AppDataModel(
-                    packageName = appInfo.packageName,
-                    appName = appInfo.loadLabel(packageManager).toString(),
-                    blocked = false,
-                    startTime = null,
-                    endTime = null
-                )
-            )
+
+        repository.getAllAppInSystem(context = context , onSuccess = {allAppModelList->
+            if(allAppModelList.size>0){
+                _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
+            }else{
+                _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+            }
+        })
+    }
+
+    fun getAppsContainingLetters(context: Context) {
+        var job: Job? = null
+        job?.cancel()
+        job = viewModelScope.launch {
+            delay(500L)
+            repository.getSearchedApps(context = context, letter = searchQuery.value) { matchedAppList ->
+                if (matchedAppList.size > 0) {
+                    _allAppsDataList.value = AllAppsFetchingState.Searching(matchedAppList)
+                } else {
+                    _allAppsDataList.value = AllAppsFetchingState.Error(e = "No App Found")
+                }
+            }
         }
-        if(allAppModelList.size>0){
-            _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
-        }else{
-            _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
-        }
+    }
+
+    fun resetSearchedList() {
+        _allAppsDataList.value = AllAppsFetchingState.Loading()
     }
 
     fun getAPPIcon(context: Context , packageName : String) : Drawable?{

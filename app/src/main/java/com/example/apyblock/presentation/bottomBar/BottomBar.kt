@@ -52,8 +52,8 @@ fun BottomBar(
 
         Button(
             onClick = {
-                viewModel.selectedScreenIndex.intValue = 0
                 navController.navigate(Screens.blockedAppScreen.route)
+                viewModel.selectedScreenIndex.intValue = 0
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -96,8 +96,8 @@ fun BottomBar(
 
         Button(
             onClick = {
-                viewModel.selectedScreenIndex.intValue = 1
                 navController.navigate(Screens.allAppDataScreen.route)
+                viewModel.selectedScreenIndex.intValue = 1
             },
             modifier = Modifier
                 .fillMaxSize()
