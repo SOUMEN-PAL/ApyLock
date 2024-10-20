@@ -14,6 +14,7 @@ import com.example.apyblock.domain.models.AppDataModel
 import com.example.apyblock.domain.repository.AppDataRepository
 import com.example.apyblock.utils.AllAppsFetchingState
 import com.example.apyblock.utils.BannedAppFetchingState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +38,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     val isSearching = mutableStateOf(false)
 
     fun getBannedApps() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 _bannedAppsListState.value =
                     BannedAppFetchingState.Success(repository.getBannedApps())
@@ -66,7 +67,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
     fun getAllAppInSystem(context: Context) {
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getAllAppInSystem(
                 context = context,
                 onSuccess = { allAppModelList ->
@@ -83,7 +84,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     fun getAppsContainingLetters(context: Context) {
         var job: Job? = null
         job?.cancel()
-        job = viewModelScope.launch {
+        job = viewModelScope.launch(Dispatchers.IO) {
             delay(500L)
             repository.getSearchedApps(
                 context = context,
@@ -114,7 +115,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     }
 
     fun deleteAppFromBannedList(packageName: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.removeFromBannedAppsList(packageName)
         }
     }
