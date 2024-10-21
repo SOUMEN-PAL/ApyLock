@@ -66,20 +66,28 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         }
     }
 
+    private var cachedAppList: List<AppDataModel> = emptyList()
+
     fun getAllAppInSystem(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.getAllAppInSystem(
-                context = context,
-                onSuccess = { allAppModelList ->
-                    if (allAppModelList.isNotEmpty()) {
-                        _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
-                    } else {
-                        _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+            if (cachedAppList.isEmpty()) { // Check if cache is empty
+                repository.getAllAppInSystem(context) { allAppModelList ->
+                    cachedAppList = allAppModelList // Update cache
+                    viewModelScope.launch(Dispatchers.Main) { // Update UI on the main thread
+                        if (cachedAppList.isNotEmpty()) {
+                            _allAppsDataList.value = AllAppsFetchingState.Success(cachedAppList as MutableList<AppDataModel>)
+                        } else {
+                            _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+                        }
                     }
                 }
-            )
+            } else {
+                // Use cached data
+                withContext(Dispatchers.Main) {
+                    _allAppsDataList.value = AllAppsFetchingState.Success(cachedAppList as MutableList<AppDataModel>)
+                }
+            }
         }
-
     }
 
     var job: Job? = null

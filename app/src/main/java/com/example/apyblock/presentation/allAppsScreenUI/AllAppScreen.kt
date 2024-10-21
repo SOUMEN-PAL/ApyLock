@@ -1,5 +1,6 @@
 package com.example.apyblock.presentation.allAppsScreenUI
 
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -203,7 +204,14 @@ fun AllAppScreen(
                                 items(searchedAppList , key = {appData->
                                     appData.packageName
                                 }){searchedAppData->
-                                    IndividualAppData(appData = searchedAppData, viewModel = viewModel)
+
+                                    var appIcon by remember { mutableStateOf<Drawable?>(null) }
+
+                                    LaunchedEffect(key1 = searchedAppData.packageName) { // Trigger when packageName changes
+                                        appIcon = viewModel.getAPPIcon(context, searchedAppData.packageName)
+                                    }
+
+                                    IndividualAppData(appData = searchedAppData, viewModel = viewModel , appIcon = appIcon)
                                 }
                             }
                         }
@@ -224,7 +232,13 @@ fun AllAppScreen(
                                 items(allAppList , key = { appData->
                                     appData.packageName
                                 }){allAppData->
-                                    IndividualAppData(appData = allAppData, viewModel = viewModel)
+                                    var appIcon by remember { mutableStateOf<Drawable?>(null) }
+
+                                    LaunchedEffect(key1 = allAppData.packageName) { // Trigger when packageName changes
+                                        appIcon = viewModel.getAPPIcon(context, allAppData.packageName)
+                                    }
+
+                                    IndividualAppData(appData = allAppData, viewModel = viewModel , appIcon = appIcon)
                                 }
                             }
                         }

@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <queries>
-        <!-- Query apps that handle web browsing -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
+<!--        &lt;!&ndash; Query apps that handle web browsing &ndash;&gt;-->
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.VIEW" />-->
+<!--            <data android:scheme="http" />-->
+<!--        </intent>-->
 
         <!-- Query apps that have launchers -->
         <intent>

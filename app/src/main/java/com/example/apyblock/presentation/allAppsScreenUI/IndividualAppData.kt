@@ -46,16 +46,12 @@ import java.time.ZoneId
 fun IndividualAppData(
     modifier: Modifier = Modifier,
     appData : AppDataModel,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    appIcon : Drawable?
 ) {
     val context = LocalContext.current
     val packageName = appData.packageName
     val appName = appData.appName
-    var appIcon by remember { mutableStateOf<Drawable?>(null) }
-
-    LaunchedEffect(key1 = packageName) { // Trigger when packageName changes
-        appIcon = viewModel.getAPPIcon(context, packageName)
-    }
     val appIconPainter = rememberDrawablePainter(drawable = appIcon)
     var isBlocked by remember {
         mutableStateOf(appData.blocked)
