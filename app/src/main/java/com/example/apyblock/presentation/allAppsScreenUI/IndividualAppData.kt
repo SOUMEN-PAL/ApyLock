@@ -1,5 +1,6 @@
 package com.example.apyblock.presentation.allAppsScreenUI
 
+import android.graphics.drawable.Drawable
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -17,6 +18,7 @@ import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,8 +51,10 @@ fun IndividualAppData(
     val context = LocalContext.current
     val packageName = appData.packageName
     val appName = appData.appName
-    val appIcon = remember(appData) {  // Remember the appIcon Drawable
-        viewModel.getAPPIcon(context = context, packageName = packageName)
+    var appIcon by remember { mutableStateOf<Drawable?>(null) }
+
+    LaunchedEffect(key1 = packageName) { // Trigger when packageName changes
+        appIcon = viewModel.getAPPIcon(context, packageName)
     }
     val appIconPainter = rememberDrawablePainter(drawable = appIcon)
     var isBlocked by remember {

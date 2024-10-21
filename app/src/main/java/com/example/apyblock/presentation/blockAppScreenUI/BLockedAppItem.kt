@@ -1,5 +1,6 @@
 package com.example.apyblock.presentation.blockAppScreenUI
 
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +17,11 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,9 +50,12 @@ fun BlockedAppItem(
     val context = LocalContext.current
     val packageName = blockedApp.packageName
     val appName = blockedApp.appName
-    val appIcon = remember(blockedApp) {  // Remember the appIcon Drawable
-        viewModel.getAPPIcon(context = context, packageName = packageName)
+    var appIcon by remember { mutableStateOf<Drawable?>(null) }
+
+    LaunchedEffect(key1 = packageName) { // Trigger when packageName changes
+        appIcon = viewModel.getAPPIcon(context, packageName)
     }
+
     val appIconPainter = rememberDrawablePainter(drawable = appIcon)
     Row(
         modifier = Modifier

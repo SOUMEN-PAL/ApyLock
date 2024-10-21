@@ -20,6 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
@@ -38,11 +39,11 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     val isSearching = mutableStateOf(false)
 
     fun getBannedApps() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
                 _bannedAppsListState.value =
                     BannedAppFetchingState.Success(repository.getBannedApps())
-            } catch (e: SQLiteException) { // More specific exception handling
+            } catch (e: SQLiteException) {
                 _bannedAppsListState.value =
                     BannedAppFetchingState.Error("Database error: ${e.message}")
             } catch (e: Exception) {
@@ -54,24 +55,23 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
 
     fun addAppData(appData: AppDataModel) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.addAppData(appData)
         }
     }
 
     fun updateTime(appData: AppDataModel) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.updateTime(appData)
         }
     }
 
     fun getAllAppInSystem(context: Context) {
-
         viewModelScope.launch(Dispatchers.IO) {
             repository.getAllAppInSystem(
                 context = context,
                 onSuccess = { allAppModelList ->
-                    if (allAppModelList.size > 0) {
+                    if (allAppModelList.isNotEmpty()) {
                         _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
                     } else {
                         _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
@@ -79,10 +79,11 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
                 }
             )
         }
+
     }
 
+    var job: Job? = null
     fun getAppsContainingLetters(context: Context) {
-        var job: Job? = null
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             delay(500L)
@@ -90,7 +91,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
                 context = context,
                 letter = searchQuery.value
             ) { matchedAppList ->
-                if (matchedAppList.size > 0) {
+                if (matchedAppList.isNotEmpty()) {
                     _allAppsDataList.value = AllAppsFetchingState.Searching(matchedAppList)
                 } else {
                     _allAppsDataList.value = AllAppsFetchingState.Error(e = "No App Found")
@@ -103,19 +104,21 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         _allAppsDataList.value = AllAppsFetchingState.Loading()
     }
 
-    fun getAPPIcon(context: Context, packageName: String): Drawable? {
-        return try {
-            val packageManager = context.packageManager
-            val applicationInfo =
-                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-            applicationInfo.loadIcon(packageManager)
-        } catch (e: PackageManager.NameNotFoundException) {
-            null
+    suspend fun getAPPIcon(context: Context, packageName: String): Drawable? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val packageManager = context.packageManager
+                val applicationInfo =
+                    packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+                applicationInfo.loadIcon(packageManager)
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
         }
     }
 
     fun deleteAppFromBannedList(packageName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repository.removeFromBannedAppsList(packageName)
         }
     }
