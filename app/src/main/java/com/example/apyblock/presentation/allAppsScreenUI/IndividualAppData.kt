@@ -33,10 +33,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import com.example.apyblock.R
 import com.example.apyblock.domain.models.AppDataModel
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -57,6 +61,7 @@ fun IndividualAppData(
     val isBlockedState =
         viewModel.appBlockedStates.getOrPut(packageName) { mutableStateOf(appData.blocked) }
     var isBlocked by remember { isBlockedState }
+    var debounceJob: Job? = null
 
     Row(
         modifier = Modifier
@@ -96,27 +101,29 @@ fun IndividualAppData(
             Switch(
                 checked = isBlocked,
                 onCheckedChange = { newIsBlocked ->
-                    isBlocked = newIsBlocked
-                    if (isBlocked) {
-                        val appDataInstance = AppDataModel(
-                            packageName = appData.packageName,
-                            appName = appData.appName,
-                            blocked = isBlocked,
-                            startTime = LocalDate.now().atTime(LocalTime.MIDNIGHT)
-                                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                            endTime = LocalDate.now().atTime(LocalTime.of(23, 59))
-                                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                        )
-                        viewModel.addAppData(appDataInstance)
-                    } else {
-                        viewModel.deleteAppFromBannedList(appData.packageName)
-                    }
-                    // or use a more targeted refresh if possible
-                    if (!viewModel.isSearching.value) {
-                        viewModel.getAllAppInSystem(context)
-                    }
-                    else{
-                        viewModel.getAppsContainingLetters(context)
+                    debounceJob?.cancel()
+                    debounceJob = viewModel.viewModelScope.launch {
+                        delay(450L)
+                        isBlocked = newIsBlocked
+                        if (isBlocked) {
+                            val appDataInstance = AppDataModel(
+                                packageName = appData.packageName,
+                                appName = appData.appName,
+                                blocked = isBlocked,
+                                startTime = LocalDate.now().atTime(LocalTime.MIDNIGHT)
+                                    .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                                endTime = LocalDate.now().atTime(LocalTime.of(23, 59))
+                                    .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            )
+                            viewModel.addAppData(appDataInstance)
+                        } else {
+                            viewModel.deleteAppFromBannedList(appData.packageName)
+                        }
+                        if (!viewModel.isSearching.value) {
+                            viewModel.getAllAppInSystem(context)
+                        } else {
+                            viewModel.getAppsContainingLetters(context)
+                        }
                     }
                 },
                 colors = SwitchDefaults.colors(
