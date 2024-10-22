@@ -45,16 +45,17 @@ import java.time.ZoneId
 @Composable
 fun IndividualAppData(
     modifier: Modifier = Modifier,
-    appData : AppDataModel,
+    appData: AppDataModel,
     viewModel: MainViewModel,
-    appIcon : Drawable?
+    appIcon: Drawable?
 ) {
     val context = LocalContext.current
     val packageName = appData.packageName
     val appName = appData.appName
     val appIconPainter = rememberDrawablePainter(drawable = appIcon)
 
-    val isBlockedState = viewModel.appBlockedStates.getOrPut(packageName) { mutableStateOf(appData.blocked) }
+    val isBlockedState =
+        viewModel.appBlockedStates.getOrPut(packageName) { mutableStateOf(appData.blocked) }
     var isBlocked by remember { isBlockedState }
 
     Row(
@@ -101,15 +102,22 @@ fun IndividualAppData(
                             packageName = appData.packageName,
                             appName = appData.appName,
                             blocked = isBlocked,
-                            startTime = LocalDate.now().atTime(LocalTime.MIDNIGHT).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                            endTime = LocalDate.now().atTime(LocalTime.of(23, 59)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                            startTime = LocalDate.now().atTime(LocalTime.MIDNIGHT)
+                                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                            endTime = LocalDate.now().atTime(LocalTime.of(23, 59))
+                                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                         )
                         viewModel.addAppData(appDataInstance)
                     } else {
                         viewModel.deleteAppFromBannedList(appData.packageName)
                     }
                     // or use a more targeted refresh if possible
-                    viewModel.getAllAppInSystem(context)
+                    if (!viewModel.isSearching.value) {
+                        viewModel.getAllAppInSystem(context)
+                    }
+                    else{
+                        viewModel.getAppsContainingLetters(context)
+                    }
                 },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = colorResource(id = R.color.appGreen),

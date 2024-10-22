@@ -195,7 +195,6 @@ fun AllAppScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             val searchedAppList = (allAppDataListState as AllAppsFetchingState.Searching).searchedAppList
-                            Log.d("appdata" , searchedAppList.toString())
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
