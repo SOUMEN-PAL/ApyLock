@@ -43,7 +43,7 @@ fun BottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(130.dp)
+            .height(150.dp)
             .imePadding()
             .padding(bottom = navigationBarsPadding.calculateBottomPadding()),
         horizontalArrangement = Arrangement.Center,

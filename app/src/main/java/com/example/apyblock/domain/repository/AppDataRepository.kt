@@ -7,7 +7,11 @@ import com.example.apyblock.domain.models.AppDataModel
 import com.example.apyblock.domain.models.AppTimeModel
 import com.example.apyblock.utils.AllAppsFetchingState
 import com.example.apyblock.utils.BannedAppFetchingState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 
 class AppDataRepository(private val appDatabase: AppDatabase) {
 
@@ -43,39 +47,43 @@ class AppDataRepository(private val appDatabase: AppDatabase) {
         appDatabase.appDataDAO().addAppData(appData = appData)
     }
 
-    suspend fun removeFromBannedAppsList(packageName:String){
+    suspend fun removeFromBannedAppsList(packageName: String) {
         appDatabase.appDataDAO().removeFromBannedAppsList(packageName)
     }
 
-    suspend fun getAllAppInSystem(context: Context, onSuccess: (MutableList<AppDataModel>) -> Unit) {
-        val packageManager = context.packageManager
-        val allAppsData = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-        val allAppModelList: MutableList<AppDataModel> = mutableListOf()
-        for (appInfo in allAppsData) {
-            allAppModelList.add(
-                AppDataModel(
-                    packageName = appInfo.packageName,
-                    appName = appInfo.loadLabel(packageManager).toString(),
-                    blocked = false,
-                    startTime = null,
-                    endTime = null
-                )
-            )
-        }
+    suspend fun getAllAppInSystem(
+        context: Context,
+        onSuccess: (MutableList<AppDataModel>) -> Unit
+    ) {
+        withContext(Dispatchers.IO){
+            val packageManager = context.packageManager
+            val allAppsData = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            val bannedAppNames = runCatching { getBannedAppNames() }.getOrElse { emptyList() }
 
-        val bannedAppNames = runCatching {getBannedAppNames() }.getOrElse { emptyList() }
-        allAppModelList.forEach { app ->
-            if(bannedAppNames.contains(app.packageName)){
-                app.blocked = true
-            }
-        }
+            val allAppModelList = allAppsData.map {appInfo->
+                async {
+                    AppDataModel(
+                        packageName = appInfo.packageName,
+                        appName = appInfo.loadLabel(packageManager).toString(),
+                        blocked = bannedAppNames.contains(appInfo.packageName),
+                        startTime = null,
+                        endTime = null
+                    )
+                }
+            }.awaitAll()
 
-        onSuccess(allAppModelList)
+            onSuccess(allAppModelList.toMutableList())
+        }
     }
 
-    suspend fun getSearchedApps(context: Context, letter : String, onSuccess : (MutableList<AppDataModel>) -> Unit){
+    suspend fun getSearchedApps(
+        context: Context,
+        letter: String,
+        onSuccess: (MutableList<AppDataModel>) -> Unit
+    ) {
         val packageManager = context.packageManager
-        val installedPackages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+        val installedPackages =
+            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         val matchingApps = mutableListOf<AppDataModel>()
 
         for (packageInfo in installedPackages) {
@@ -87,9 +95,9 @@ class AppDataRepository(private val appDatabase: AppDatabase) {
             }
         }
 
-        val bannedAppNames = runCatching {getBannedAppNames() }.getOrElse { emptyList() }
-        matchingApps.forEach{app->
-            if(bannedAppNames.contains(app.packageName)){
+        val bannedAppNames = runCatching { getBannedAppNames() }.getOrElse { emptyList() }
+        matchingApps.forEach { app ->
+            if (bannedAppNames.contains(app.packageName)) {
                 app.blocked = true
             }
         }

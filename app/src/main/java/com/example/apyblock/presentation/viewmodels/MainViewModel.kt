@@ -81,8 +81,10 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         }
     }
 
+
+    var job: Job? = null
     fun getAppsContainingLetters(context: Context) {
-        var job: Job? = null
+
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             delay(500L)
