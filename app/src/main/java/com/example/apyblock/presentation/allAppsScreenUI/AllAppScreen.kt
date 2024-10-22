@@ -185,7 +185,7 @@ fun AllAppScreen(
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(color = colorResource(id = R.color.appGreen))
                         }
                     }
                     is AllAppsFetchingState.Searching -> {

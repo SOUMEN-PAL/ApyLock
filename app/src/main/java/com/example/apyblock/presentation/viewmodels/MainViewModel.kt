@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteException
 import android.graphics.drawable.Drawable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         MutableStateFlow<AllAppsFetchingState>(AllAppsFetchingState.Loading())
     val allAppsDataList = _allAppsDataList.asStateFlow()
 
+    val appBlockedStates = mutableMapOf<String, MutableState<Boolean>>()
 
     val selectedScreenIndex = mutableIntStateOf(0)
     val searchQuery = mutableStateOf("")
@@ -56,6 +58,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     fun addAppData(appData: AppDataModel) {
         viewModelScope.launch {
             repository.addAppData(appData)
+            appBlockedStates[appData.packageName]?.value = true
         }
     }
 
@@ -75,6 +78,10 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
                         _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
                     } else {
                         _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
+                    }
+
+                    allAppModelList.forEach { appData ->
+                        appBlockedStates[appData.packageName] = mutableStateOf(appData.blocked)
                     }
                 }
             )
@@ -119,6 +126,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     fun deleteAppFromBannedList(packageName: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.removeFromBannedAppsList(packageName)
+            appBlockedStates[packageName]?.value = false
         }
     }
 

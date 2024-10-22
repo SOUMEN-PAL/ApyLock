@@ -53,9 +53,9 @@ fun IndividualAppData(
     val packageName = appData.packageName
     val appName = appData.appName
     val appIconPainter = rememberDrawablePainter(drawable = appIcon)
-    var isBlocked by remember {
-        mutableStateOf(appData.blocked)
-    }
+
+    val isBlockedState = viewModel.appBlockedStates.getOrPut(packageName) { mutableStateOf(appData.blocked) }
+    var isBlocked by remember { isBlockedState }
 
     Row(
         modifier = Modifier
@@ -94,10 +94,9 @@ fun IndividualAppData(
         ) {
             Switch(
                 checked = isBlocked,
-                onCheckedChange = {
-                    //TODO:Add To block List
-                    isBlocked = it
-                    if(isBlocked){
+                onCheckedChange = { newIsBlocked ->
+                    isBlocked = newIsBlocked
+                    if (isBlocked) {
                         val appDataInstance = AppDataModel(
                             packageName = appData.packageName,
                             appName = appData.appName,
@@ -106,9 +105,11 @@ fun IndividualAppData(
                             endTime = LocalDate.now().atTime(LocalTime.of(23, 59)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                         )
                         viewModel.addAppData(appDataInstance)
-                    }else{
+                    } else {
                         viewModel.deleteAppFromBannedList(appData.packageName)
                     }
+                    // or use a more targeted refresh if possible
+                    viewModel.getAllAppInSystem(context)
                 },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = colorResource(id = R.color.appGreen),
