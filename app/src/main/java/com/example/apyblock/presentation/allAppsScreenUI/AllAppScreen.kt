@@ -105,11 +105,12 @@ fun AllAppScreen(
                     .focusRequester(focusRequester)
                     .onFocusChanged { focusState ->
                         isFocused = focusState.isFocused
+                        viewModel.searchQuery.value = ""
                         if (isFocused) {
                             viewModel.isSearching.value = true
                         }
                     }
-                    .weight(1.7f),
+                    .weight(2f),
                 trailingIcon = {
                     IconButton(onClick = {
                         if (isFocused) {
@@ -163,7 +164,7 @@ fun AllAppScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(9f),
+                    .weight(8f),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){

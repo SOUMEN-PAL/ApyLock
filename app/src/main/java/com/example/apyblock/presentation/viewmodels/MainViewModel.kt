@@ -20,7 +20,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
@@ -39,11 +38,11 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     val isSearching = mutableStateOf(false)
 
     fun getBannedApps() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 _bannedAppsListState.value =
                     BannedAppFetchingState.Success(repository.getBannedApps())
-            } catch (e: SQLiteException) {
+            } catch (e: SQLiteException) { // More specific exception handling
                 _bannedAppsListState.value =
                     BannedAppFetchingState.Error("Database error: ${e.message}")
             } catch (e: Exception) {
@@ -55,43 +54,37 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
 
 
     fun addAppData(appData: AppDataModel) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repository.addAppData(appData)
         }
     }
 
     fun updateTime(appData: AppDataModel) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             repository.updateTime(appData)
         }
     }
 
-    private var cachedAppList: List<AppDataModel> = emptyList()
-
     fun getAllAppInSystem(context: Context) {
+
         viewModelScope.launch(Dispatchers.IO) {
-            if (cachedAppList.isEmpty()) { // Check if cache is empty
-                repository.getAllAppInSystem(context) { allAppModelList ->
-                    cachedAppList = allAppModelList // Update cache
-                    viewModelScope.launch(Dispatchers.Main) { // Update UI on the main thread
-                        if (cachedAppList.isNotEmpty()) {
-                            _allAppsDataList.value = AllAppsFetchingState.Success(cachedAppList as MutableList<AppDataModel>)
-                        } else {
-                            _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
-                        }
+            repository.getAllAppInSystem(
+                context = context,
+                onSuccess = { allAppModelList ->
+                    if (allAppModelList.size > 0) {
+                        _allAppsDataList.value = AllAppsFetchingState.Success(allAppModelList)
+                    } else {
+                        _allAppsDataList.value = AllAppsFetchingState.Error("No Apps Installed")
                     }
                 }
-            } else {
-                // Use cached data
-                withContext(Dispatchers.Main) {
-                    _allAppsDataList.value = AllAppsFetchingState.Success(cachedAppList as MutableList<AppDataModel>)
-                }
-            }
+            )
         }
     }
 
+
     var job: Job? = null
     fun getAppsContainingLetters(context: Context) {
+
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             delay(500L)
@@ -99,7 +92,7 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
                 context = context,
                 letter = searchQuery.value
             ) { matchedAppList ->
-                if (matchedAppList.isNotEmpty()) {
+                if (matchedAppList.size > 0) {
                     _allAppsDataList.value = AllAppsFetchingState.Searching(matchedAppList)
                 } else {
                     _allAppsDataList.value = AllAppsFetchingState.Error(e = "No App Found")
@@ -112,21 +105,19 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
         _allAppsDataList.value = AllAppsFetchingState.Loading()
     }
 
-    suspend fun getAPPIcon(context: Context, packageName: String): Drawable? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val packageManager = context.packageManager
-                val applicationInfo =
-                    packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-                applicationInfo.loadIcon(packageManager)
-            } catch (e: PackageManager.NameNotFoundException) {
-                null
-            }
+    fun getAPPIcon(context: Context, packageName: String): Drawable? {
+        return try {
+            val packageManager = context.packageManager
+            val applicationInfo =
+                packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            applicationInfo.loadIcon(packageManager)
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
         }
     }
 
     fun deleteAppFromBannedList(packageName: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.removeFromBannedAppsList(packageName)
         }
     }

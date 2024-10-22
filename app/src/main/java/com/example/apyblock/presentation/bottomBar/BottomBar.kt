@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +44,7 @@ fun BottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(130.dp)
+            .height(135.dp)
             .imePadding()
             .padding(bottom = navigationBarsPadding.calculateBottomPadding()),
         horizontalArrangement = Arrangement.Center,
@@ -66,20 +67,6 @@ fun BottomBar(
                 disabledContentColor = Color.Transparent
             )
         ) {
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .fillMaxSize()
-                    .background(
-                        color = if (selectedButton == 0) {
-                            colorResource(id = R.color.onTapColor)
-                        } else {
-                            Color.Transparent
-                        }
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
                 Image(
                     painter = if (selectedButton == 0) {
                         painterResource(id = R.drawable.blocked_app_on_clicked)
@@ -89,10 +76,12 @@ fun BottomBar(
                     contentDescription = "",
                     modifier = Modifier.size(75.dp)
                 )
-            }
+
 
 
         }
+
+        VerticalDivider(color = Color(0xFF9C9C9C))
 
         Button(
             onClick = {
@@ -110,20 +99,7 @@ fun BottomBar(
                 disabledContentColor = Color.Transparent
             )
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .fillMaxSize()
-                    .background(
-                        color = if (selectedButton == 1) {
-                            colorResource(id = R.color.onTapColor)
-                        } else {
-                            Color.Transparent
-                        }
-                    ),
-                contentAlignment = Alignment.Center,
 
-                ) {
                 Image(
                     painter = if (selectedButton == 1) {
                         painterResource(id = R.drawable.all_app_clicked)
@@ -133,7 +109,7 @@ fun BottomBar(
                     contentDescription = "",
                     modifier = Modifier.size(75.dp)
                 )
-            }
+
         }
     }
 }

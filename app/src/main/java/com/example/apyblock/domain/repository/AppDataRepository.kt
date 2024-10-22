@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 
 class AppDataRepository(private val appDatabase: AppDatabase) {
-    private var bannedAppNamesCache : List<String>? = null
 
     suspend fun getBannedApps(): List<AppDataModel> {
         return try {
@@ -48,21 +47,20 @@ class AppDataRepository(private val appDatabase: AppDatabase) {
         appDatabase.appDataDAO().addAppData(appData = appData)
     }
 
-    suspend fun removeFromBannedAppsList(packageName:String){
+    suspend fun removeFromBannedAppsList(packageName: String) {
         appDatabase.appDataDAO().removeFromBannedAppsList(packageName)
     }
 
-    suspend fun getAllAppInSystem(context: Context, onSuccess: (MutableList<AppDataModel>) -> Unit) {
-        withContext(Dispatchers.IO) {
+    suspend fun getAllAppInSystem(
+        context: Context,
+        onSuccess: (MutableList<AppDataModel>) -> Unit
+    ) {
+        withContext(Dispatchers.IO){
             val packageManager = context.packageManager
             val allAppsData = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            val bannedAppNames = runCatching { getBannedAppNames() }.getOrElse { emptyList() }
 
-            // Fetch banned app names only if cache is empty
-            val bannedAppNames = bannedAppNamesCache ?: runCatching { getBannedAppNames() }
-                .getOrElse { emptyList() }
-                .also { bannedAppNamesCache = it } // Update cache
-
-            val allAppModelList = allAppsData.map { appInfo ->
+            val allAppModelList = allAppsData.map {appInfo->
                 async {
                     AppDataModel(
                         packageName = appInfo.packageName,
@@ -78,33 +76,32 @@ class AppDataRepository(private val appDatabase: AppDatabase) {
         }
     }
 
-    suspend fun getSearchedApps(context: Context, letter: String, onSuccess: (MutableList<AppDataModel>) -> Unit) {
-        withContext(Dispatchers.IO) {
-            val packageManager = context.packageManager
-            val installedPackages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+    suspend fun getSearchedApps(
+        context: Context,
+        letter: String,
+        onSuccess: (MutableList<AppDataModel>) -> Unit
+    ) {
+        val packageManager = context.packageManager
+        val installedPackages =
+            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+        val matchingApps = mutableListOf<AppDataModel>()
 
-            // Fetch banned app names only if cache is empty
-            val bannedAppNames = bannedAppNamesCache ?: runCatching { getBannedAppNames() }
-                .getOrElse { emptyList() }
-                .also { bannedAppNamesCache = it } // Update cache
+        for (packageInfo in installedPackages) {
+            val appName = packageManager.getApplicationLabel(packageInfo).toString()
 
-            val matchingApps = installedPackages.filter { packageInfo ->
-                val appName = packageManager.getApplicationLabel(packageInfo).toString()
-                appName.contains(letter, ignoreCase = true)
-            }.map { packageInfo ->
-                async {
-                    val appName = packageManager.getApplicationLabel(packageInfo).toString()
-                    val packageName = packageInfo.packageName
-                    AppDataModel(
-                        packageName = packageName,
-                        appName = appName,
-                        blocked = bannedAppNames.contains(packageName)
-                    )
-                }
-            }.awaitAll()
-
-            onSuccess(matchingApps.toMutableList())
+            if (appName.contains(letter, ignoreCase = true)) { // Case-insensitive search
+                val packageName = packageInfo.packageName
+                matchingApps.add(AppDataModel(packageName, appName))
+            }
         }
+
+        val bannedAppNames = runCatching { getBannedAppNames() }.getOrElse { emptyList() }
+        matchingApps.forEach { app ->
+            if (bannedAppNames.contains(app.packageName)) {
+                app.blocked = true
+            }
+        }
+        onSuccess(matchingApps)
     }
 
 }
