@@ -2,6 +2,7 @@ package com.example.apyblock.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.apyblock.domain.models.AppDataModel
@@ -9,7 +10,7 @@ import com.example.apyblock.domain.models.AppTimeModel
 
 @Dao
 interface AppDAO {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addAppData(appData : AppDataModel)
 
     @Query("SELECT * FROM blocked_apps")
@@ -27,4 +28,6 @@ interface AppDAO {
     @Update
     suspend fun updateAppData(appData: AppDataModel)
 
+    @Query("SELECT * FROM blocked_apps WHERE packageName = :packageName")
+    suspend fun getAppByPackageName(packageName: String): AppDataModel?
 }

@@ -5,6 +5,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteException
 import android.graphics.drawable.Drawable
+import android.util.Log
+import android.view.View
+import androidx.compose.material3.Snackbar
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,10 +58,21 @@ class MainViewModel(private val repository: AppDataRepository) : ViewModel() {
     }
 
 
+//    fun addAppData(appData: AppDataModel) {
+//        viewModelScope.launch {
+//            repository.addAppData(appData)
+//            appBlockedStates[appData.packageName]?.value = true
+//        }
+//    }
+
     fun addAppData(appData: AppDataModel) {
         viewModelScope.launch {
-            repository.addAppData(appData)
-            appBlockedStates[appData.packageName]?.value = true
+            try {
+                repository.addAppData(appData)
+                appBlockedStates[appData.packageName]?.value = true
+            } catch (e: Exception) {
+                Log.e("dataError" , "To many request")
+            }
         }
     }
 

@@ -43,9 +43,20 @@ class AppDataRepository(private val appDatabase: AppDatabase) {
         appDatabase.appDataDAO().updateAppData(appData = appData)
     }
 
+//    suspend fun addAppData(appData: AppDataModel) {
+//        appDatabase.appDataDAO().addAppData(appData = appData)
+//    }
+
     suspend fun addAppData(appData: AppDataModel) {
-        appDatabase.appDataDAO().addAppData(appData = appData)
+        val existingApp = appDatabase.appDataDAO().getAppByPackageName(appData.packageName) // Fetch app
+        if (existingApp == null) { // Check if exist
+            appDatabase.appDataDAO().addAppData(appData = appData) // If not, add
+        } else {
+            //Update the existing row with `OnConflictStrategy` or notify the user.
+
+        }
     }
+
 
     suspend fun removeFromBannedAppsList(packageName: String) {
         appDatabase.appDataDAO().removeFromBannedAppsList(packageName)
