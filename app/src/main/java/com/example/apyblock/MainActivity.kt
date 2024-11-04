@@ -18,6 +18,13 @@ import com.example.apyblock.presentation.navigation.Navigation
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.example.apyblock.presentation.viewmodels.MainViewModelFactory
 import com.example.apyblock.ui.theme.ApyBlockTheme
+/*
+
+Use This command if on linux to run emulator smooth ly
+DRI_PRIME=1 emulator -avd Pixel_8_API_35
+
+
+ */
 
 class MainActivity : ComponentActivity() {
     lateinit var mainViewModel: MainViewModel
