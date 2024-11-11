@@ -5,4 +5,5 @@ sealed class Screens(val route : String) {
     data object permissionScreen : Screens("permissionScreen")
     data object blockedAppScreen : Screens("blockedAppScreen")
     data object allAppDataScreen : Screens("allAppsScreen")
+    data object addInfoScreen : Screens("appInfoScreen")
 }

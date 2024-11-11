@@ -37,8 +37,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apyblock.R
 import com.example.apyblock.domain.models.AppDataModel
+import com.example.apyblock.presentation.navigation.Screens
 import com.example.apyblock.presentation.viewmodels.MainViewModel
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 fun BlockedAppItem(
@@ -102,7 +105,8 @@ fun BlockedAppItem(
                 )
                 Button(
                     onClick = {
-                        /*TODO*/
+                        val jsonData = Json.encodeToString(blockedApp)
+                        navController.navigate(Screens.addInfoScreen.route + "/${jsonData}")
                     },
                     colors = ButtonColors(
                         containerColor = colorResource(id = R.color.appGreen),
