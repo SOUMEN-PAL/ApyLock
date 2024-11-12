@@ -61,11 +61,22 @@ class AppBlockingService : AccessibilityService() {
                     withContext(Dispatchers.IO) {
                         val timeDetail = repository.getAppTimeDetails(packageName)
                         // ... (other logic)
+                        val startTime = timeDetail.startTime
+                        val endTime = timeDetail.endTime
+                        withContext(Dispatchers.Main) {
+                            if(startTime != null && endTime != null) {
+                                val currentTime = System.currentTimeMillis()
+                                if(currentTime >= startTime && currentTime <= endTime) {
+                                    performGlobalAction(GLOBAL_ACTION_HOME)
+                                    Log.d("blockingApp", "Blocking $packageName")
+                                }
+                            }
+                        }
                     }
 
                     // Perform blocking action (consider alternatives)
-                    performGlobalAction(GLOBAL_ACTION_HOME)
-                    Log.d("blockingApp", "Blocking $packageName")
+//                    performGlobalAction(GLOBAL_ACTION_HOME)
+//                    Log.d("blockingApp", "Blocking $packageName")
                 }
             }
         }
