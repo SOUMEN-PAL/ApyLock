@@ -1,10 +1,17 @@
 package com.example.apyblock.presentation.viewmodels
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.apyblock.domain.models.AppDataModel
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -45,11 +52,13 @@ class TimePickerViewModel : ViewModel() {
         _showEndTimeDialog.value = false
     }
 
+    //String to millisecond converter
+    @RequiresApi(Build.VERSION_CODES.O)
     fun timeToMilliseconds(time: String): Long {
-        val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-        format.timeZone = TimeZone.getTimeZone("UTC") // Set to UTC to get milliseconds since midnight
-        return format.parse(time)?.time ?: 0L
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val localTime = LocalTime.parse(time, formatter)
+        return LocalDate.now().atTime(localTime)
+            .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
-
 
 }
