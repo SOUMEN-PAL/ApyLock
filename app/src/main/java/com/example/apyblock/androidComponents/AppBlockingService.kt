@@ -2,10 +2,12 @@ package com.example.apyblock.androidComponents
 
 import android.accessibilityservice.AccessibilityService
 import android.graphics.PixelFormat
+import android.os.Build
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
@@ -23,6 +25,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class AppBlockingService : AccessibilityService() {
 
@@ -45,6 +50,7 @@ class AppBlockingService : AccessibilityService() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
         if (event != null && event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
@@ -64,11 +70,23 @@ class AppBlockingService : AccessibilityService() {
                         val startTime = timeDetail.startTime
                         val endTime = timeDetail.endTime
                         withContext(Dispatchers.Main) {
-                            if(startTime != null && endTime != null) {
-                                val currentTime = System.currentTimeMillis()
-                                if(currentTime >= startTime && currentTime <= endTime) {
-                                    performGlobalAction(GLOBAL_ACTION_HOME)
-                                    Log.d("blockingApp", "Blocking $packageName")
+                            if (startTime != null && endTime != null) {
+                                val currentDateTime = LocalDateTime.now()
+                                val startDateTime = Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                                val endDateTime = Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+                                if (startDateTime.isAfter(endDateTime)) { // Time range crosses midnight
+                                    if (currentDateTime.isAfter(startDateTime) || currentDateTime.isBefore(endDateTime)) {
+                                        // App should be blocked
+                                        performGlobalAction(GLOBAL_ACTION_HOME)
+                                        Log.d("blockingApp", "Blocking $packageName")
+                                    }
+                                } else { // Time range within the same day
+                                    if (currentDateTime.isAfter(startDateTime) && currentDateTime.isBefore(endDateTime)) {
+                                        // App should be blocked
+                                        performGlobalAction(GLOBAL_ACTION_HOME)
+                                        Log.d("blockingApp", "Blocking $packageName")
+                                    }
                                 }
                             }
                         }
