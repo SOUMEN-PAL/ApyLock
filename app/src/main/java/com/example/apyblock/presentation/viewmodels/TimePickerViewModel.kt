@@ -52,6 +52,11 @@ class TimePickerViewModel : ViewModel() {
         _showEndTimeDialog.value = false
     }
 
+    fun dataReset(){
+        startTime.value = "00:00"
+        endTime.value = "23:59"
+    }
+
     //String to millisecond converter
     @RequiresApi(Build.VERSION_CODES.O)
     fun timeToMilliseconds(time: String): Long {

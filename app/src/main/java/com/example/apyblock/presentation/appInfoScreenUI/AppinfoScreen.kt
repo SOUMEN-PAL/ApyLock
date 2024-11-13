@@ -3,6 +3,7 @@ package com.example.apyblock.presentation.appInfoScreenUI
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -76,6 +77,7 @@ fun AppInfoScreen(
     timePickerViewModel: TimePickerViewModel,
     navController: NavController
 ) {
+
 
     BackHandler {
         navController.popBackStack()
@@ -293,6 +295,7 @@ fun AppInfoScreen(
                     newData.startTime = timePickerViewModel.timeToMilliseconds(timePickerViewModel.startTime.value)
                     newData.endTime = timePickerViewModel.timeToMilliseconds(timePickerViewModel.endTime.value)
                     mainViewModel.updateTime(newData)
+                    Toast.makeText(context , "$appName blocked from ${startTime.value} to ${endTime.value}" , Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.size(width = 353.dp, height = 60.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -314,7 +317,8 @@ fun AppInfoScreen(
             
             Button(
                 onClick = {
-                    timePickerViewModel.reset()
+                    timePickerViewModel.dataReset()
+                    Toast.makeText(context , "App permanently blocked!!" , Toast.LENGTH_LONG).show()
                 },
                 modifier = Modifier.size(width = 353.dp, height = 60.dp),
                 shape = RoundedCornerShape(16.dp),
